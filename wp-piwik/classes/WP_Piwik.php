@@ -10,7 +10,7 @@ use WP_Piwik\Widget\Post;
  */
 class WP_Piwik {
 
-	private static $revisionId = 2023092201, $version = '1.0.30', $blog_id, $pluginBasename = NULL, $logger, $settings, $request, $optionsPageId;
+	private static $revisionId = 2023092201, $version = '1.0.31', $blog_id, $pluginBasename = NULL, $logger, $settings, $request, $optionsPageId;
     public $statsPageId;
 
     /**
@@ -267,6 +267,10 @@ class WP_Piwik {
 	public function showNotices() {
 		$link = sprintf ( '<a href="' . $this->getSettingsURL () . '">%s</a>', __ ( 'Settings', 'wp-piwik' ) );
 		if ($notices = $this->getWordPressOption ( 'wp-piwik-notices' )) {
+			if (!is_array ( $notices )) {
+				$notices = [];
+			}
+
 			foreach ( $notices as $type => $notice ) {
 				printf ( '<div class="updated fade"><p>%s <strong>%s:</strong> %s: %s</p></div>', $notice ['subject'], __ ( 'Important', 'wp-piwik' ), $notice ['text'], $link );
 				if (! $notice ['stay'])
