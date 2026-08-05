@@ -11,7 +11,7 @@ use WP_Piwik\Widget\Post;
 class WP_Piwik {
 
 	private static $revision_id = 2023092201;
-	private static $version     = '1.1.9';
+	private static $version     = '1.1.10';
 	private static $blog_id;
 	private static $plugin_basename = null;
 	private static $logger;
@@ -1447,6 +1447,7 @@ class WP_Piwik {
 			self::$settings->set_option( 'tracking_code', $result ['script'], $blog_id );
 			self::$settings->set_option( 'noscript_code', $result ['noscript'], $blog_id );
 			self::$settings->set_global_option( 'proxy_url', $result ['proxy'] );
+			self::$settings->save();
 			return $result['script'];
 		}
 		return false;
@@ -1591,7 +1592,11 @@ class WP_Piwik {
 	 * @return boolean True if current page is WP-Piwik's option page
 	 */
 	public static function is_valid_options_post() {
-		return is_admin() && check_admin_referer( 'wp-piwik_settings' ) && current_user_can( 'manage_options' );
+		// when the plugin is network activated the settings are stored as network wide site options
+		// and the settings screen is registered with 'manage_sites', so saving has to require the
+		// same capability instead of the per site 'manage_options'.
+		$capability = self::$settings->check_network_activation() ? 'manage_sites' : 'manage_options';
+		return is_admin() && check_admin_referer( 'wp-piwik_settings' ) && current_user_can( $capability );
 	}
 
 	private function set_up_ai_bot_tracking() {

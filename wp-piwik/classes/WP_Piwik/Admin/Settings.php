@@ -420,6 +420,24 @@ class Settings extends \WP_Piwik\Admin {
 
 			$this->show_input( 'limit_cookies_referral', __( 'Referral timeout (seconds)', 'wp-piwik' ), false, $is_not_generated_tracking || ! self::$settings->get_global_option( 'limit_cookies' ), $full_generated_tracking_group . ' wp-piwik-cookielifetime-option' . ( self::$settings->get_global_option( 'limit_cookies' ) ? '' : ' wp-piwik-hidden' ) );
 
+			$this->show_input(
+				'cookie_allowlist',
+				__( 'Cookie allow list (tracker proxy)', 'wp-piwik' ),
+				sprintf(
+					esc_html__(
+						'When using the tracker proxy, only forward cookies matching the given patterns to Matomo. Enter a comma-separated list of cookie names; a trailing %1$s*%2$s matches by prefix. Leave empty to disable the allow list (known WordPress cookies such as the login/session cookies, and the PHP session cookie, are always removed regardless, and the %1$smatomo_ignore%2$s / %1$spiwik_ignore%2$s opt-out cookies are always forwarded so that opted-out visitors stay untracked). If you haven\'t configured custom cookie names or prefixes in Matomo, a value that only allows the default Matomo tracker cookies would be %1$s_pk_*, mtm_*%2$s. If you are using custom cookie names, you will need to make sure what you enter here reflects those customizations.',
+						'wp-piwik'
+					),
+					'<code>',
+					'</code>'
+				),
+				false,
+				$full_generated_tracking_group,
+				false,
+				true,
+				true
+			);
+
 			$this->show_checkbox( 'track_admin', __( 'Track admin pages', 'wp-piwik' ), __( 'Enable to track users on admin pages (remember to configure the tracking filter appropriately).', 'wp-piwik' ), $is_not_tracking, $full_generated_tracking_group . ' wp-piwik-track-option-manually' );
 
 			echo '<tr class="' . esc_attr( $full_generated_tracking_group ) . ' wp-piwik-track-option-manually' . ( $is_not_tracking ? ' hidden' : '' ) . '">';
@@ -605,7 +623,7 @@ class Settings extends \WP_Piwik\Admin {
 				'post' => __( 'POST', 'wp-piwik' ),
 				'get'  => __( 'GET', 'wp-piwik' ),
 			),
-			__( 'Choose whether WP-Matomo should use POST or GET in HTTP or Cloud mode.', 'wp-piwik' )
+			__( 'Choose whether WP-Matomo should use POST or GET in HTTP or Cloud mode. POST is recommended: it keeps the auth token out of server access logs and is not subject to URL length limits.', 'wp-piwik' )
 		);
 
 		$this->show_checkbox( 'disable_timelimit', __( 'Disable time limit', 'wp-piwik' ), __( 'Use set_time_limit(0) if stats page causes a time out.', 'wp-piwik' ) );
@@ -863,7 +881,7 @@ class Settings extends \WP_Piwik\Admin {
 	 * @param boolean $hide_description $hideDescription set to false to show description initially (default: true)
 	 * @param boolean $is_global set to false if the textarea shows a site-specific option (default: true)
 	 */
-	private function show_select( $id, $name, $options = array(), $description = '', $on_change = '', $is_hidden = false, $group_name = '', $hide_description = true, $is_global = true ) {
+	public function show_select( $id, $name, $options = array(), $description = '', $on_change = '', $is_hidden = false, $group_name = '', $hide_description = true, $is_global = true ) {
 		$default = $is_global ? self::$settings->get_global_option( $id ) : self::$settings->get_option( $id );
 
 		$this->show_input_wrapper(
@@ -877,7 +895,7 @@ class Settings extends \WP_Piwik\Admin {
 				?>
 			<select name="wp-piwik[<?php echo esc_attr( $id ); ?>]" id="<?php echo esc_attr( $id ); ?>" onchange="<?php echo esc_attr( $on_change ); ?>">
 				<?php foreach ( $options as $key => $value ) : ?>
-					<option value="<?php echo esc_attr( $key ); ?>" <?php echo ( $key === $default ? ' selected="selected"' : '' ); ?> ><?php echo esc_html( $value ); ?></option>
+					<option value="<?php echo esc_attr( $key ); ?>" <?php echo ( (string) $key === (string) $default ? ' selected="selected"' : '' ); ?> ><?php echo esc_html( $value ); ?></option>
 				<?php endforeach; ?>
 			</select>
 				<?php
@@ -1037,7 +1055,7 @@ class Settings extends \WP_Piwik\Admin {
 				esc_html_e( 'enabled', 'wp-piwik' );
 			?>
 			</strong>.</li>
-			<li><strong><?php echo ( ( ( function_exists( 'curl_init' ) && ini_get( 'allow_url_fopen' ) && 'curl' === self::$settings->get_global_option( 'http_connection' ) ) || ( function_exists( 'curl_init' ) && ! ini_get( 'allow_url_fopen' ) ) ) ? esc_html__( 'cURL', 'wp-piwik' ) : esc_html__( 'fopen', 'wp-piwik' ) ) . ' (' . ( 'post' === self::$settings->get_global_option( 'http_method' ) ? esc_html__( 'POST', 'wp-piwik' ) : esc_html__( 'GET', 'wp-piwik' ) ) . ')</strong> ' . esc_html__( 'is used.', 'wp-piwik' ); ?></li>
+			<li><strong><?php echo ( ( ( function_exists( 'curl_init' ) && ini_get( 'allow_url_fopen' ) && 'curl' === self::$settings->get_global_option( 'http_connection' ) ) || ( function_exists( 'curl_init' ) && ! ini_get( 'allow_url_fopen' ) ) ) ? esc_html__( 'cURL', 'wp-piwik' ) : esc_html__( 'fopen', 'wp-piwik' ) ) . ' (' . ( 'get' === self::$settings->get_global_option( 'http_method' ) ? esc_html__( 'GET', 'wp-piwik' ) : esc_html__( 'POST', 'wp-piwik' ) ) . ')</strong> ' . esc_html__( 'is used.', 'wp-piwik' ); ?></li>
 			<?php
 			if ( 'php' === self::$settings->get_global_option( 'piwik_mode' ) ) {
 				?>

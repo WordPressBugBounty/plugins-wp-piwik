@@ -3,7 +3,7 @@
 Contributors: Braekling
 Requires at least: 5.0
 Tested up to: 7.0.0
-Stable tag: 1.1.9
+Stable tag: 1.1.10
 Tags: matomo, tracking, statistics, stats, analytics
 
 Adds Matomo (former Piwik) statistics to your WordPress dashboard and is also able to add the Matomo Tracking Code to your blog.
@@ -145,6 +145,12 @@ Add WP-Matomo to your /wp-content/plugins folder and enable it as [Network Plugi
 5. Matomo: Here you'll find your auth token.
 
 == Changelog ==
+
+= 1.1.10 =
+* Update tracker proxy to latest version.
+* New: added a "Cookie allow list" tracking option that restricts which cookies the tracking proxy forwards to Matomo (comma-separated list of cookie names, trailing * matches by prefix). Disabled by default.
+* Security: the tracking proxy now always removes known WordPress cookies (login/session, settings, comment author, etc.) and the PHP session cookie before forwarding a request to Matomo. Authentication cookies renamed through the wp-config.php cookie constants are recognised as well. Matomo opt out cookies are always forwarded.
+* Bug fix: fix external Matomo request that occurred on every frontend page view.
 
 = 1.1.9 =
 * Bug fix: correctly check clear parameter value.
